@@ -30,7 +30,7 @@ export const hookFactory: ListedNftsHookFactory = ({contract}) => () => {
           price: parseFloat(ethers.utils.formatEther(item.price)),
           tokenId: item.tokenId.toNumber(),
           creator: item.creator,
-          isListed: item.isListed,
+          isListed: item.is Listed,
           meta
         })
       }
