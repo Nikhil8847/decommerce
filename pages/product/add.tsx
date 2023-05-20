@@ -24,12 +24,7 @@ const NftCreate: NextPage = () => {
   const [nftMeta, setNftMeta] = useState<NftMeta>({
     name: "",
     description: "",
-    image: "",
-    attributes: [
-      { trait_type: "attack", value: "0" },
-      { trait_type: "health", value: "0" },
-      { trait_type: "speed", value: "0" },
-    ],
+    image: ""
   });
 
   const getSignedData = async () => {
@@ -97,14 +92,13 @@ const NftCreate: NextPage = () => {
 
   const handleAttributeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const attributeIdx = nftMeta.attributes.findIndex(
-      (attr) => attr.trait_type === name
-    );
+    // const attributeIdx = nftMeta.attributes.findIndex(
+    //   (attr) => attr.trait_type === name
+    // );
 
-    nftMeta.attributes[attributeIdx].value = value;
+    // nftMeta.attributes[attributeIdx].value = value;
     setNftMeta({
       ...nftMeta,
-      attributes: nftMeta.attributes,
     });
   };
 

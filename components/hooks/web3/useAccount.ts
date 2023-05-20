@@ -53,7 +53,6 @@ export const hookFactory: AccountHookFactory =
     const connect = async () => {
       try {
         ethereum?.request({ method: "eth_requestAccounts" });
-        console.log("khota");
       } catch (e) {
         console.error(e);
       }
