@@ -13,18 +13,19 @@ import { toast } from "react-toastify";
 import { useNetwork } from "@hooks/web3";
 import { ExclamationIcon } from "@heroicons/react/solid";
 
-const ALLOWED_FIELDS = ["name", "description", "image", "attributes"];
+const ALLOWED_FIELDS = ["name", "description", "image"];
 
 const NftCreate: NextPage = () => {
+  const headers = new Headers();
+
   const { ethereum, contract } = useWeb3();
   const { network } = useNetwork();
   const [nftURI, setNftURI] = useState("");
   const [price, setPrice] = useState("");
-  const [hasURI, setHasURI] = useState(false);
   const [nftMeta, setNftMeta] = useState<NftMeta>({
     name: "",
     description: "",
-    image: ""
+    image: "",
   });
 
   const getSignedData = async () => {
@@ -73,6 +74,9 @@ const NftCreate: NextPage = () => {
       });
 
       const data = res.data as PinataRes;
+      console.log(
+        `${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`
+      );
 
       setNftMeta({
         ...nftMeta,
@@ -90,17 +94,17 @@ const NftCreate: NextPage = () => {
     setNftMeta({ ...nftMeta, [name]: value });
   };
 
-  const handleAttributeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    // const attributeIdx = nftMeta.attributes.findIndex(
-    //   (attr) => attr.trait_type === name
-    // );
+  // const handleAttributeChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   // const attributeIdx = nftMeta.attributes.findIndex(
+  //   //   (attr) => attr.trait_type === name
+  //   // );
 
-    // nftMeta.attributes[attributeIdx].value = value;
-    setNftMeta({
-      ...nftMeta,
-    });
-  };
+  //   // nftMeta.attributes[attributeIdx].value = value;
+  //   setNftMeta({
+  //     ...nftMeta,
+  //   });
+  // };
 
   const uploadMetadata = async () => {
     try {
@@ -119,6 +123,7 @@ const NftCreate: NextPage = () => {
       });
 
       const data = res.data as PinataRes;
+
       setNftURI(
         `${process.env.NEXT_PUBLIC_PINATA_DOMAIN}/ipfs/${data.IpfsHash}`
       );
@@ -129,9 +134,11 @@ const NftCreate: NextPage = () => {
 
   const createNft = async () => {
     try {
-      const nftRes = await axios.get(nftURI);
+      console.log("Adding nft : " + nftURI);
+      const nftRes = await axios.get(nftURI, {
+        headers: { Accept: "text/plain" },
+      });
       const content = nftRes.data;
-
       Object.keys(content).forEach((key) => {
         if (!ALLOWED_FIELDS.includes(key)) {
           throw new Error("Invalid Json structure");
@@ -188,29 +195,7 @@ const NftCreate: NextPage = () => {
   return (
     <BaseLayout>
       <div>
-        <div className="py-4">
-          {!nftURI && (
-            <div className="flex">
-              <div className="mr-2 font-bold underline">
-                Do you have meta data already?
-              </div>
-              <Switch
-                checked={hasURI}
-                onChange={() => setHasURI(!hasURI)}
-                className={`${hasURI ? "bg-indigo-900" : "bg-indigo-700"}
-                  relative inline-flex flex-shrink-0 h-[28px] w-[64px] border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
-              >
-                <span className="sr-only">Use setting</span>
-                <span
-                  aria-hidden="true"
-                  className={`${hasURI ? "translate-x-9" : "translate-x-0"}
-                    pointer-events-none inline-block h-[24px] w-[24px] rounded-full bg-white shadow-lg transform ring-0 transition ease-in-out duration-200`}
-                />
-              </Switch>
-            </div>
-          )}
-        </div>
-        {nftURI || hasURI ? (
+        {nftURI ? (
           <div className="md:grid md:grid-cols-3 md:gap-6">
             <div className="md:col-span-1">
               <div className="px-4 sm:px-0">
@@ -226,38 +211,14 @@ const NftCreate: NextPage = () => {
             <div className="mt-5 md:mt-0 md:col-span-2">
               <form>
                 <div className="shadow sm:rounded-md sm:overflow-hidden">
-                  {hasURI && (
-                    <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
-                      <div>
-                        <label
-                          htmlFor="uri"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          URI Link
-                        </label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
-                          <input
-                            onChange={(e) => setNftURI(e.target.value)}
-                            type="text"
-                            name="uri"
-                            id="uri"
-                            className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
-                            placeholder="http://link.com/data.json"
-                          />
-                        </div>
-                      </div>
+                  <div className="mb-4 p-4">
+                    <div className="font-bold">Your metadata: </div>
+                    <div>
+                      <Link href={nftURI}>
+                        <a className="underline text-indigo-600">{nftURI}</a>
+                      </Link>
                     </div>
-                  )}
-                  {nftURI && (
-                    <div className="mb-4 p-4">
-                      <div className="font-bold">Your metadata: </div>
-                      <div>
-                        <Link href={nftURI}>
-                          <a className="underline text-indigo-600">{nftURI}</a>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                   <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
                     <div>
                       <label
